@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SKYMODS CYBER ID - RIDING MODE</title>
+    <style>
+        :root {
+            --bg-metal: #08080a;
+            --neon-purple: #d500ff;
+            --neon-cyan: #00e5ff;
+            --neon-blue: #0088ff;
+            --text-main: #ffffff;
+            --text-dim: #8b8b99;
+            --font-sys: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: var(--text-main);
+            font-family: var(--font-sys);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .key-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .key-card {
+            width: 320px;
+            background: var(--bg-metal);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.3);
+        }
+        .key-title {
+            color: var(--neon-cyan);
+            font-size: 18px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+        .key-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--text-main);
+            font-family: var(--font-sys);
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .key-input:focus {
+            outline: none;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+        .key-btn {
+            background: rgba(0, 229, 255, 0.2);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 10px 30px;
+            font-family: var(--font-sys);
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .key-btn:active {
+            background: var(--neon-cyan);
+            color: #000;
+            transform: scale(0.95);
+        }
+        .key-error {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+        .key-success {
+            color: #00ff88;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+        .device-id {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 15px;
+            word-break: break-all;
+        }
+
+        .audio-control {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 229, 255, 0.2);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 20px;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+
+        .cyber-card {
+            width: 92%;
+            max-width: 400px;
+            aspect-ratio: 5 / 8;
+            max-height: 88vh;
+            background-color: var(--bg-metal);
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+            clip-path: polygon(10% 0, 100% 0, 100% 92%, 92% 100%, 0 100%, 0 8%);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15), 0 30px 60px rgba(0,0,0,0.95);
+            opacity: 0;
+            transform: scale(0.9) translateY(30px);
+            animation: bootUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            transition: all 0.4s ease;
+            display: none;
+        }
+
+        .cyber-card.visible {
+            display: block;
+        }
+
+        .particle {
+            position: absolute; width: 3px; height: 3px;
+            background: var(--neon-purple); border-radius: 50%; opacity: 0;
+            box-shadow: 0 0 10px 2px var(--neon-purple);
+            animation: floatUp infinite linear;
+        }
+
+        .ticker-wrap {
+            position: absolute; top: 0; left: 10%; right: 0; height: 16px;
+            background: var(--neon-cyan); color: #000; overflow: hidden;
+            display: flex; align-items: center; z-index: 15;
+            clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+        }
+        .ticker {
+            display: flex;
+            width: max-content;
+            animation: marquee 12s linear infinite;
+        }
+        .ticker span {
+            white-space: nowrap; font-size: 9px; font-weight: 900; letter-spacing: 2px;
+            padding-right: 15px;
+        }
+
+        @keyframes bootUp { 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes seqFade { 0% { opacity: 0; transform: translateX(15px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spinRev { 100% { transform: rotate(-360deg); } }
+        @keyframes blink { 0%, 100% { opacity: 1; box-shadow: 0 0 12px var(--neon-cyan); } 50% { opacity: 0.1; box-shadow: 0 0 0 transparent; } }
+        @keyframes scanline { 0% { top: -5%; opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { top: 105%; opacity: 0; } }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 0.9; } 80% { opacity: 0.5; } 100% { transform: translateY(-200px) scale(0.2); opacity: 0; } }
+        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes neonPulse { 0%, 100% { box-shadow: 0 0 15px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.2); } 50% { box-shadow: 0 0 30px rgba(0, 229, 255, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.5); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .portrait-wrapper {
+            position: absolute;
+            top: 45px; left: 40px; right: 40px; 
+            bottom: 155px; 
+            background: linear-gradient(135deg, #0a0a2a, #050510);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 6px;
+            animation: bootUp 0.5s 0.3s forwards, neonPulse 3s 0.8s infinite ease-in-out;
+            z-index: 1; overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .portrait-wrapper::before {
+            content: "⚡ RIDING MODE ⚡";
+            color: var(--neon-cyan);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            animation: blink 1s infinite;
+        }
+        .portrait-wrapper::after {
+            content: ''; position: absolute; left: 0; right: 0; top: 0; height: 5px;
+            background: rgba(0, 229, 255, 0.8); box-shadow: 0 0 25px 5px var(--neon-cyan);
+            animation: scanline 4s infinite; pointer-events: none;
+        }
+
+        .hardware-screws {
+            position: absolute; top: 25px; left: 15px;
+            display: flex; flex-direction: column; gap: 12px; z-index: 5;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--neon-cyan); animation: blink 1.2s infinite; }
+        .screw { width: 8px; height: 8px; border-radius: 50%; background: #333; box-shadow: inset 1px 1px 3px #000; }
+
+        .right-specs {
+            position: absolute; right: 8px; top: 40px;
+            display: flex; gap: 15px; writing-mode: vertical-rl; z-index: 5;
+            opacity: 0; animation: seqFade 0.5s 0.6s forwards;
+        }
+        .spec-block { display: flex; flex-direction: column; gap: 3px; }
+        .spec-label { color: var(--text-dim); font-size: 7px; letter-spacing: 2px; }
+        .spec-value { color: var(--neon-cyan); font-size: 10px; font-weight: bold; }
+
+        .name-panel {
+            position: absolute; bottom: 65px; left: 0; width: 60%; 
+            background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(5px);
+            padding: 12px 20px 12px 15px;
+            border: 1px solid var(--neon-cyan); border-left: none;
+            clip-path: polygon(0 0, 85% 0, 100% 25%, 100% 100%, 0 100%);
+            z-index: 10; opacity: 0; animation: bootUp 0.5s 0.8s forwards;
+        }
+        .name-label { color: var(--neon-cyan); font-size: 9px; letter-spacing: 2px; }
+        .name-value { color: var(--text-main); font-size: 22px; font-weight: 900; text-shadow: 0 0 8px var(--neon-cyan);}
+        .mission-label { color: var(--neon-cyan); font-size: 8px; letter-spacing: 2px; }
+        .mission-value { color: var(--text-main); font-size: 11px; }
+
+        .cyber-logo {
+            position: absolute; bottom: 65px; right: 25px;
+            display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 10;
+            opacity: 0; animation: seqFade 0.5s 0.9s forwards;
+            cursor: pointer;
+        }
+        .crosshair {
+            width: 44px; height: 44px; 
+            border: 2px solid var(--neon-cyan); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(0, 229, 255, 0.05);
+            transition: all 0.2s;
+        }
+        .ring-1 { position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border: 1px dashed var(--neon-cyan); border-radius: 50%; animation: spin 6s linear infinite; }
+        .ring-2 { position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border: 1px dotted var(--neon-purple); border-radius: 50%; animation: spinRev 8s linear infinite; }
+        .tg-icon { width: 22px; height: 22px; fill: var(--neon-cyan); animation: floatIcon 3s infinite; }
+        .logo-text { font-size: 11px; letter-spacing: 3px; color: var(--neon-cyan); }
+
+        .action-console {
+            position: absolute;
+            bottom: 15px;
+            left: 0; width: 100%;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            z-index: 20; opacity: 0; animation: bootUp 0.5s 1s forwards;
+        }
+        .meta-text { font-size: 7px; color: var(--text-dim); letter-spacing: 2px; }
+        .init-btn {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 10px 30px;
+            font-family: var(--font-sys);
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 15px rgba(0,229,255,0.2);
+            clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+        }
+        .init-btn:active {
+            background: var(--neon-cyan);
+            color: #000;
+            transform: scale(0.95);
+        }
+
+        .expiry-warning {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 9px;
+            color: #ff8800;
+            z-index: 15;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="youtube-player" style="position: fixed; bottom: -100px; left: -100px; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
+        <iframe id="youtubeFrame" width="1" height="1" src="https://www.youtube.com/embed/337-Aroj1Ew?autoplay=0&loop=1&playlist=337-Aroj1Ew&controls=0&disablekb=1&modestbranding=1&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+
+    <div class="audio-control" id="audioControl" onclick="toggleMusic()" style="display: none;">
+        🔈
+    </div>
+
+    <div class="key-overlay" id="keyOverlay">
+        <div class="key-card">
+            <div class="key-title">🔐 DEVICE VERIFICATION</div>
+            <div class="device-id" id="deviceId"></div>
+            <input type="text" class="key-input" id="keyInput" placeholder="MASUKAN KEY AKTIVASI" maxlength="20" autocomplete="off">
+            <button class="key-btn" onclick="verifyKey()">ACTIVATE</button>
+            <div class="key-error" id="keyError"></div>
+            <div class="key-success" id="keySuccess"></div>
+        </div>
+    </div>
+
+    <div class="cyber-card" id="mainCard">
+        <div class="ticker-wrap">
+            <div class="ticker">
+                <span>SYSTEM SECURE // SKYMODS VIP ENGINE V3 // RIDING MODE // ENCRYPTION: MAXIMUM // KEY VERIFIED</span>
+                <span>SYSTEM SECURE // SKYMODS VIP ENGINE V3 // RIDING MODE // ENCRYPTION: MAXIMUM // KEY VERIFIED</span>
+            </div>
+        </div>
+
+        <div id="particles"></div>
+        <div class="portrait-wrapper"></div>
+
+        <div class="hardware-screws">
+            <div class="status-dot"></div>
+            <div class="screw"></div>
+        </div>
+
+        <div class="right-specs">
+            <div class="spec-block"><span class="spec-label">DEVICE ID</span><span class="spec-value" id="displayDeviceId">-</span></div>
+            <div class="spec-block"><span class="spec-label">STATUS</span><span class="spec-value">VERIFIED</span></div>
+            <div class="spec-block"><span class="spec-label">EXPIRED</span><span class="spec-value" id="expiryDate">2027</span></div>
+        </div>
+
+        <div class="name-panel">
+            <div class="name-label">RIDER NAME</div>
+            <div class="name-value">SKYMODS:</div>
+            <div class="mission-label">RIDING CODE</div>
+            <div class="mission-value">RIDE_TO_MENU</div>
+        </div>
+
+        <div class="cyber-logo" onclick="openLink('https://t.me/livhom_543')">
+            <div class="crosshair">
+                <div class="ring-1"></div>
+                <div class="ring-2"></div>
+                <svg class="tg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.21-1.12-.33-1.08-.7.02-.19.27-.39.75-.6 2.93-1.28 4.88-2.12 5.86-2.53 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/></svg>
+            </div>
+            <div class="logo-text">MODS</div>
+        </div>
+
+        <div class="action-console">
+            <button class="init-btn" onclick="triggerRide()">RIDE TO MENU</button>
+            <div class="meta-text">SKYMODS INC. 2026 | RIDING MODE</div>
+        </div>
+        <div class="expiry-warning" id="expiryWarning"></div>
+    </div>
+
+    <script>
+        // ==================== 🔑 10 KEY BAWAAN ====================
+        // Format: { key: "KEYNYA", device_id: null, expiry: "2027-12-31" }
+        
+        const AVAILABLE_KEYS = [
+            { key: "SKYMODS01", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "SKYMODS02", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "SKYMODS03", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "SKYMODS04", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "SKYMODS05", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "SKYVIP01", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "SKYVIP02", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "RIDE2027", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "CYBER123", device_id: null, expiry: "2027-12-31", used_by: null },
+            { key: "MAHORAGA", device_id: null, expiry: "2027-12-31", used_by: null }
+        ];
+        
+        // KEY YANG SUDAH TERPAKAI (DISIMPAN DI LOCALSTORAGE)
+        let usedKeys = [];
+        
+        // LOAD DATA KEY YANG SUDAH TERPAKAI
+        function loadUsedKeys() {
+            const saved = localStorage.getItem('skymods_used_keys');
+            if (saved) {
+                usedKeys = JSON.parse(saved);
+            } else {
+                usedKeys = [];
+            }
+        }
+        
+        // SAVE DATA KEY YANG SUDAH TERPAKAI
+        function saveUsedKeys() {
+            localStorage.setItem('skymods_used_keys', JSON.stringify(usedKeys));
+        }
+        
+        // CEK APAKAH KEY MASIH VALID (BELUM KADALUARSA)
+        function isKeyExpired(expiryDate) {
+            const today = new Date();
+            const expiry = new Date(expiryDate);
+            return today > expiry;
+        }
+        
+        // CEK APAKAH KEY SUDAH DIPAKAI DEVICE LAIN
+        function isKeyUsedByOtherDevice(key, currentDeviceId) {
+            const usedKey = usedKeys.find(k => k.key === key);
+            if (usedKey && usedKey.device_id !== currentDeviceId) {
+                return true; // Dipakai device lain
+            }
+            return false;
+        }
+        
+        // REGISTER KEY KE DEVICE
+        function registerKey(key, deviceId) {
+            // Cek apakah key sudah ada di usedKeys
+            const existingIndex = usedKeys.findIndex(k => k.key === key);
+            
+            if (existingIndex !== -1) {
+                // Update device_id kalo sama (re-activation di device yang sama)
+                if (usedKeys[existingIndex].device_id !== deviceId) {
+                    return false; // Key dipakai device lain
+                }
+                return true;
+            }
+            
+            // Key baru, daftarkan
+            usedKeys.push({
+                key: key,
+                device_id: deviceId,
+                activated_at: new Date().toISOString()
+            });
+            saveUsedKeys();
+            return true;
+        }
+        
+        // VERIFIKASI KEY
+        function verifyKeyWithSystem(inputKey, deviceId) {
+            // Cari key di daftar available keys
+            const validKey = AVAILABLE_KEYS.find(k => k.key === inputKey);
+            
+            if (!validKey) {
+                return { valid: false, reason: "KEY TIDAK VALID!" };
+            }
+            
+            // Cek kadaluarsa
+            if (isKeyExpired(validKey.expiry)) {
+                return { valid: false, reason: "KEY SUDAH KADALUARSA (MAX 2027)!" };
+            }
+            
+            // Cek apakah key sudah dipakai device lain
+            if (isKeyUsedByOtherDevice(inputKey, deviceId)) {
+                return { valid: false, reason: "KEY SUDAH DIPAKAI DEVICE LAIN!" };
+            }
+            
+            // Register key
+            const registered = registerKey(inputKey, deviceId);
+            if (!registered) {
+                return { valid: false, reason: "KEY SUDAH DIPAKAI DEVICE LAIN!" };
+            }
+            
+            return { valid: true, keyData: validKey };
+        }
+        
+        // ==================== SISTEM DEVICE ID ====================
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('device_id');
+            if (!deviceId) {
+                deviceId = 'DEV_' + Math.random().toString(36).substr(2, 16).toUpperCase();
+                localStorage.setItem('device_id', deviceId);
+            }
+            return deviceId;
+        }
+        
+        // CEK APAKAH DEVICE SUDAH AKTIVASI SEBELUMNYA
+        function isDeviceActivated() {
+            const savedKey = localStorage.getItem('activated_key');
+            const savedDevice = localStorage.getItem('activated_device');
+            const currentDevice = getDeviceId();
+            
+            if (savedKey && savedDevice === currentDevice) {
+                // Verifikasi ulang key masih valid
+                const validKey = AVAILABLE_KEYS.find(k => k.key === savedKey);
+                if (validKey && !isKeyExpired(validKey.expiry)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // SAVE ACTIVATION
+        function saveActivation(key, deviceId) {
+            localStorage.setItem('activated_key', key);
+            localStorage.setItem('activated_device', deviceId);
+            localStorage.setItem('activation_date', Date.now().toString());
+        }
+        
+        // ==================== VERIFIKASI KEY (MAIN) ====================
+        async function verifyKey() {
+            const keyInput = document.getElementById('keyInput');
+            const keyError = document.getElementById('keyError');
+            const keySuccess = document.getElementById('keySuccess');
+            const key = keyInput.value.trim().toUpperCase();
+            const deviceId = getDeviceId();
+            
+            // Sembunyikan pesan sebelumnya
+            keyError.style.display = 'none';
+            keySuccess.style.display = 'none';
+            
+            if (key === "") {
+                keyError.innerText = '❌ KEY TIDAK BOLEH KOSONG!';
+                keyError.style.display = 'block';
+                keyInput.value = '';
+                keyInput.focus();
+                return;
+            }
+            
+            // Disable button
+            const verifyBtn = document.querySelector('.key-btn');
+            verifyBtn.disabled = true;
+            verifyBtn.innerText = 'VERIFYING...';
+            
+            // Simulasi delay (biar ada efek)
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const result = verifyKeyWithSystem(key, deviceId);
+            
+            verifyBtn.disabled = false;
+            verifyBtn.innerText = 'ACTIVATE';
+            
+            if (result.valid) {
+                saveActivation(key, deviceId);
+                keySuccess.innerText = '✅ AKTIVASI BERHASIL! Mengalihkan...';
+                keySuccess.style.display = 'block';
+                
+                // Update expiry display
+                document.getElementById('expiryDate').innerText = '2027';
+                document.getElementById('expiryWarning').innerHTML = '⏰ KEY VALID SAMPAI 2027 ⏰';
+                
+                setTimeout(() => {
+                    document.getElementById('keyOverlay').style.display = 'none';
+                    document.querySelector('.audio-control').style.display = 'flex';
+                    document.getElementById('mainCard').classList.add('visible');
+                    document.getElementById('displayDeviceId').innerText = deviceId.substr(0, 12);
+                    initMusic();
+                    spawnParticles();
+                }, 1500);
+            } else {
+                keyError.innerText = `❌ ${result.reason}`;
+                keyError.style.display = 'block';
+                keyInput.value = '';
+                keyInput.focus();
+            }
+        }
+        
+        // ==================== TAMPILAN ====================
+        document.getElementById('deviceId').innerHTML = '📱 Device ID: ' + getDeviceId();
+        
+        // Cek aktivasi saat load
+        loadUsedKeys();
+        
+        if (isDeviceActivated()) {
+            document.getElementById('keyOverlay').style.display = 'none';
+            document.querySelector('.audio-control').style.display = 'flex';
+            document.getElementById('mainCard').classList.add('visible');
+            document.getElementById('displayDeviceId').innerText = getDeviceId().substr(0, 12);
+            document.getElementById('expiryDate').innerText = '2027';
+            document.getElementById('expiryWarning').innerHTML = '⏰ KEY VALID SAMPAI 2027 ⏰';
+            spawnParticles();
+            setTimeout(() => { initMusic(); }, 500);
+        } else {
+            document.getElementById('keyOverlay').style.display = 'flex';
+            document.getElementById('mainCard').classList.remove('visible');
+        }
+        
+        // ==================== MUSIC SYSTEM ====================
+        let musicPlaying = false;
+        let youtubeFrame = document.getElementById('youtubeFrame');
+        
+        function initMusic() {
+            if (!musicPlaying) {
+                youtubeFrame.src = "https://www.youtube.com/embed/337-Aroj1Ew?autoplay=1&loop=1&playlist=337-Aroj1Ew&controls=0&disablekb=1&modestbranding=1&rel=0";
+                musicPlaying = true;
+                document.getElementById('audioControl').innerHTML = '🔊';
+            }
+        }
+        
+        function toggleMusic() {
+            if (musicPlaying) {
+                youtubeFrame.src = "https://www.youtube.com/embed/337-Aroj1Ew?autoplay=0&loop=1&playlist=337-Aroj1Ew&controls=0&disablekb=1&modestbranding=1&rel=0";
+                musicPlaying = false;
+                document.getElementById('audioControl').innerHTML = '🔈';
+            } else {
+                youtubeFrame.src = "https://www.youtube.com/embed/337-Aroj1Ew?autoplay=1&loop=1&playlist=337-Aroj1Ew&controls=0&disablekb=1&modestbranding=1&rel=0";
+                musicPlaying = true;
+                document.getElementById('audioControl').innerHTML = '🔊';
+            }
+        }
+        
+        // ==================== PARTICLE SYSTEM ====================
+        function spawnParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            const particleCount = 45; 
+            
+            for (let i = 0; i < particleCount; i++) {
+                let p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.top = (80 + Math.random() * 20) + '%'; 
+                p.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                p.style.animationDelay = (Math.random() * 3) + 's';
+                
+                if(Math.random() > 0.65) {
+                    p.style.background = '#00e5ff';
+                    p.style.boxShadow = '0 0 10px 2px #00e5ff';
+                }
+                container.appendChild(p);
+            }
+        }
+        
+        // ==================== FUNGSI LAIN ====================
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+        
+        function triggerRide() {
+            const card = document.getElementById('mainCard');
+            const btn = document.querySelector('.init-btn');
+            
+            btn.style.background = '#00e5ff';
+            btn.style.color = '#000';
+            btn.innerText = 'RIDING NOW...';
+            
+            document.getElementById('particles').style.opacity = '0';
+            
+            card.style.animation = 'none';
+            card.style.transition = 'all 0.4s ease-out';
+            card.style.transform = 'scale(0.85) translateY(60px)';
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = "action://close";
+            }, 500);
+        }
+        
+        // Enter key support
+        document.getElementById('keyInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyKey();
+            }
+        });
+    </script>
+</body>
+</html>
