@@ -326,7 +326,7 @@
 
     <div class="key-overlay" id="keyOverlay">
         <div class="key-card">
-            <div class="key-title">🔐 DEVICE VERIFICATION</div>
+            <div class="key-title">ZEN PANEL KEY</div>
             <div class="device-id" id="deviceId"></div>
             <input type="text" class="key-input" id="keyInput" placeholder="MASUKAN KEY AKTIVASI" maxlength="20" autocomplete="off">
             <button class="key-btn" onclick="verifyKey()">ACTIVATE</button>
@@ -528,7 +528,7 @@
             keySuccess.style.display = 'none';
             
             if (key === "") {
-                keyError.innerText = '❌ KEY TIDAK BOLEH KOSONG!';
+                keyError.innerText = 'KEY TIDAK BOLEH KOSONG!';
                 keyError.style.display = 'block';
                 keyInput.value = '';
                 keyInput.focus();
@@ -550,12 +550,12 @@
             
             if (result.valid) {
                 saveActivation(key, deviceId);
-                keySuccess.innerText = '✅ AKTIVASI BERHASIL! Mengalihkan...';
+                keySuccess.innerText = 'AKTIVASI BERHASIL! Mengalihkan...';
                 keySuccess.style.display = 'block';
                 
                 // Update expiry display
                 document.getElementById('expiryDate').innerText = '2027';
-                document.getElementById('expiryWarning').innerHTML = '⏰ KEY VALID SAMPAI 2027 ⏰';
+                document.getElementById('expiryWarning').innerHTML = 'SKY';
                 
                 setTimeout(() => {
                     document.getElementById('keyOverlay').style.display = 'none';
@@ -566,7 +566,7 @@
                     spawnParticles();
                 }, 1500);
             } else {
-                keyError.innerText = `❌ ${result.reason}`;
+                keyError.innerText = ` ${result.reason}`;
                 keyError.style.display = 'block';
                 keyInput.value = '';
                 keyInput.focus();
@@ -585,7 +585,7 @@
             document.getElementById('mainCard').classList.add('visible');
             document.getElementById('displayDeviceId').innerText = getDeviceId().substr(0, 12);
             document.getElementById('expiryDate').innerText = '2027';
-            document.getElementById('expiryWarning').innerHTML = '⏰ KEY VALID SAMPAI 2027 ⏰';
+            document.getElementById('expiryWarning').innerHTML = 'OWNER SKY';
             spawnParticles();
             setTimeout(() => { initMusic(); }, 500);
         } else {
